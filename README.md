@@ -2,6 +2,19 @@
 
 # PIONPOS Thermal Printer Setup
 
+## Create .env file for credentials
+```
+CUSTOMER_ID=
+BRANCH_ID=
+CUSTOMER_EMAIL=
+CUSTOMER_PASSWORD=
+
+FS_API_KEY=
+FS_AUTH_DOMAIN=
+FS_DATABASE_URL=
+FS_PROJECT_ID=
+```
+
 ## SETUP FOR PION THERMAL PRINTER (WINDOWS)
 
 - install pm2
