@@ -32,7 +32,7 @@ async function init() {
 
 async function signIn() {
     try {
-	
+
         let res = await firebase.auth().signInWithEmailAndPassword(
             process.env.CUSTOMER_EMAIL,
             process.env.CUSTOMER_PASSWORD
@@ -63,7 +63,7 @@ function listenResource() {
 function print(data) {
 
     let printers = []
-    
+
     data.SELECTED_PRINTERS.forEach(function (item) {
         let printer = new ThermalPrinter({
             type: PrinterTypes.EPSON,
@@ -160,7 +160,7 @@ function replaceAll(string, search, replace) {
         return string.split(search).join(replace);
     }
     return ""
-  }
+}
 
 const replaceTrChars = (temp) => {
     // const searchRegExp = /\s/g;
