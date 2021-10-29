@@ -50,7 +50,7 @@ function listenResource() {
         .doc(RESOURCE_PATH)
         // .orderBy('name', 'asc')
         .onSnapshot(docSnapshot => {
-            console.log('docSnapshot', docSnapshot.data());
+            // console.log('docSnapshot', docSnapshot.data());
             let data = docSnapshot.data()
 
             print(data)
@@ -60,8 +60,6 @@ function listenResource() {
 }
 
 function print(data) {
-    console.log("TCP ADDRESS: ", data.TCP_ADDRESS)
-
     let printers = []
     data.SELECTED_PRINTERS.forEach(function (item) {
         let printer = new ThermalPrinter({
@@ -71,7 +69,7 @@ function print(data) {
         });
         console.log('created printer ')
         printer.DETAILS = item
-        console.log('printer with details', printer.DETAILS)
+        // console.log('printer with details', printer.DETAILS)
         printers.push(printer)
     })
 
@@ -100,8 +98,6 @@ function print(data) {
 
 
     } else if (data.TYPE === ORDER_TYPE) {
-
-
         if (data.ORDERS.bar) {
 
             let printer = printers.find(function (p) {
@@ -127,26 +123,50 @@ function print(data) {
             }
         }
 
-        if (data.ORDERS.kitchen) {
+        if (data.ORDERS.yelkenKitchen) {
             let printer = printers.find(function (p) {
-                console.log(p.DETAILS.sectionRef)
+                // console.log(p.DETAILS.sectionRef)
                 return p.DETAILS.roles.ORDER === true &&
                     p.DETAILS.sectionRef === 'yelken-mutfak'
             })
 
-            if (!printer) {
-                printer = printers.find(function (p) {
-                    return p.DETAILS.roles.ORDER === true &&
-                        p.DETAILS.sectionRef === 'garden-mutfak'
-                })
-            }
+            console.log(printer.DETAILS)
 
             if (!printer) {
                 console.log("no printer available for kitchen")
                 return
             }
 
-            printer.println(data.ORDERS.kitchen);
+            // console.log(data.ORDERS.yelkenKitchen)
+            printer.println(data.ORDERS.yelkenKitchen);
+            printer.cut();
+
+            try {
+
+                printer.beep(); // Sound internal beeper/buzzer (if available)
+                let execute = printer.execute();
+                console.log("Print done kitchen with new!");
+                // await printer.printImage(".touch.png"); // Print PNG image
+            } catch (error) {
+                console.log("Print failed with new:", error);
+            }
+        }
+
+        if (data.ORDERS.gardenKitchen) {
+            let printer = printers.find(function (p) {
+                // console.log(p.DETAILS.sectionRef)
+                return p.DETAILS.roles.ORDER === true &&
+                    p.DETAILS.sectionRef === 'garden-mutfak'
+            })
+
+            // console.log(printer.DETAILS)
+
+            if (!printer) {
+                console.log("no printer available for kitchen")
+                return
+            }
+
+            printer.println(data.ORDERS.gardenKitchen);
             printer.cut();
 
             try {
