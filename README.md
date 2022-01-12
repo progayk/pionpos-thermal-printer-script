@@ -1,8 +1,7 @@
-
-
 # PIONPOS Thermal Printer Setup
 
 ## Create .env file for credentials
+
 ```
 CUSTOMER_ID=
 BRANCH_ID=
@@ -22,16 +21,19 @@ FS_PROJECT_ID=
 - install node-thermal-printer
 
 For windows install pm2-windows-startup
+
 ```
-npm in pm2-windows-startup -g
+npm i pm2-windows-startup -g
 ```
 
-- add index.js to pm2 
+- add index.js to pm2
+
 ```
 pm2 start [path-to-index]
 ```
 
 start windows pm2
+
 ```
 pm2-startup install
 ```
@@ -49,6 +51,7 @@ pm2 save
 - Insert SD Card into Raspi.
 
 - After booting the Raspi ssh into it:
+
 ```
 ssh pi@raspberrypi.local
 ```
@@ -56,11 +59,13 @@ ssh pi@raspberrypi.local
 ### Configure Raspi
 
 - Enable ssh and change localisation settings from `raspi-config`:
+
 ```
 sudo raspi-config
 ```
 
 Update and upgrade:
+
 ```
 sudo apt-get update && sudo apt-get upgrade
 ```
@@ -68,6 +73,7 @@ sudo apt-get update && sudo apt-get upgrade
 ### Setup new user
 
 It's generally a good idea to have a different linux user for each app running on your server. To create a new user, for an `api` app for example:
+
 ```
 sudo useradd -m api -G sudo
 sudo passwd api
@@ -75,6 +81,7 @@ logout
 ```
 
 Login with the user and password you just created. After you've confirmed your new user has sudo privelages, you can delete the default `pi` user for good measure:
+
 ```
 sudo deluser pi
 ```
@@ -84,6 +91,7 @@ sudo deluser pi
 You can plug your Pi via ethernet cable to your router or setup Wifi.
 
 To connect to Wifi: `sudo nano /etc/wpa_supplicant/wpa_supplicant.conf`. Add the following:
+
 ```
 network={
 ssid="SSID"
@@ -94,12 +102,14 @@ psk="WIFI PASSWORD"
 Most wireless routers these days are also DHCP servers, which means by default, you will get a different IP address every time you connect to the network. This isn't ideal, as you'll need to know where to find your server on the network if you're going to route requests to or SSH into it.
 
 To assign Static IP address to your Pi on the internal network:
+
 ```
 sudo nano /etc/dhcpcd.conf
 ```
 
 Add the following:
 `static ip_address=192.168.1.200/24` de olabilir.
+
 ```
 interface wlan0
 
@@ -142,6 +152,7 @@ sudo npm install -g yarn pm2
 ```
 
 #### Configure PM2 Logrotate (optional)
+
 PM2, the process manager that keeps your Node scripts running, outputs great log files. However, without configuration these log files can eat up more and more storage on you Pi. The `pm2-logrotate` module can help with this issue.
 
 ```
@@ -154,6 +165,7 @@ pm2 set pm2-logrotate:compress true
 ```
 
 #### Tweak Nginx (optional)
+
 By default Nginx will advertise it's exact version number, in the server header and a couple other places. You can stop this behavior by editing the nginx config file:
 
 ```
@@ -305,7 +317,6 @@ cat duck.log
 ```
 
 If it's says `OK`, we good.
-
 
 ### Enable SSL like a boss (optional)
 
