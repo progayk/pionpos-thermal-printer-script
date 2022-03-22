@@ -51,7 +51,7 @@ function listenResource() {
         .onSnapshot(docSnapshot => {
             console.log('docSnapshot', docSnapshot.data());
             let data = docSnapshot.data()
-
+            console.log({ data });
             print(data)
         }, err => {
             console.log(err);
@@ -59,7 +59,7 @@ function listenResource() {
 }
 
 function print(data) {
-    console.log("TCP ADDRESS: ", data.TCP_ADDRESS)
+    // console.log("TCP ADDRESS: ", data.TCP_ADDRESS)
 
     let printers = []
     data.SELECTED_PRINTERS.forEach(function (item) {
@@ -128,7 +128,7 @@ function replaceAll(string, search, replace) {
         return string.split(search).join(replace);
     }
     return ""
-  }
+}
 
 const replaceTrChars = (temp) => {
     // const searchRegExp = /\s/g;

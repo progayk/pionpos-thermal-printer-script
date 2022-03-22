@@ -26,6 +26,10 @@ For windows install pm2-windows-startup
 npm i pm2-windows-startup -g
 ```
 
+```
+npm i pm2 -g
+```
+
 - add index.js to pm2
 
 ```

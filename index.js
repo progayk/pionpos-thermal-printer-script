@@ -50,9 +50,7 @@ function listenResource() {
         .doc(RESOURCE_PATH)
         // .orderBy('name', 'asc')
         .onSnapshot(docSnapshot => {
-            console.log('docSnapshot', docSnapshot.data());
             let data = docSnapshot.data()
-
             print(data)
         }, err => {
             console.log(err);
@@ -86,7 +84,7 @@ function print(data) {
             return
         }
 
-        printer.println(data.OUTPUT)
+        printer.println(replaceTrChars(data.OUTPUT));
         printer.cut();
 
         try {
@@ -114,7 +112,7 @@ function print(data) {
                 return
             }
 
-            printer.println(data.ORDERS.bar);
+            printer.println(replaceTrChars(data.ORDERS.bar));
             printer.cut();
 
             try {
@@ -131,22 +129,19 @@ function print(data) {
             let printer = printers.find(function (p) {
                 console.log(p.DETAILS.sectionRef)
                 return p.DETAILS.roles.ORDER === true &&
-                    p.DETAILS.sectionRef === 'yelken-mutfak'
+                    p.DETAILS.sectionRef === 'mutfak'
             })
-
-            if (!printer) {
-                printer = printers.find(function (p) {
-                    return p.DETAILS.roles.ORDER === true &&
-                        p.DETAILS.sectionRef === 'garden-mutfak'
-                })
-            }
 
             if (!printer) {
                 console.log("no printer available for kitchen")
                 return
             }
 
-            printer.println(data.ORDERS.kitchen);
+            // printer.setTextDoubleHeight();                              // Set text to double height
+            // printer.setTextDoubleWidth();
+
+            console.log(data.ORDERS.kitchen)
+            printer.println(replaceTrChars(data.ORDERS.kitchen));
             printer.cut();
 
             try {
@@ -163,5 +158,27 @@ function print(data) {
 
     return (data)
 }
+
+
+function replaceAll(string, search, replace) {
+    if (string) {
+        return string.split(search).join(replace);
+    }
+    return ""
+}
+
+const replaceTrChars = (temp) => {
+    // const searchRegExp = /\s/g;
+    // replaceWith = '-';
+
+    let res = replaceAll(temp, 'İ', "i");
+    // console.log(res)
+    res = replaceAll(res, "ş", "s");
+    res = replaceAll(res, "Ş", "S");
+    res = replaceAll(res, "ğ", "g");
+    // console.log(res)
+    return res
+}
+
 
 init()
