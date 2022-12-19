@@ -15,7 +15,7 @@ firebase.initializeApp(firebaseConfig);
 
 const BRANCH_PATH = `customers/${process.env.CUSTOMER_ID}/branches/${process.env.BRANCH_ID}`
 const RESOURCE_PATH = `${BRANCH_PATH}/messegeQeue/msg`
-
+console.log(BRANCH_PATH)
 const ORDER_TYPE = "ORDER"
 const RECEIPT_TYPE = "RECEIPT"
 
@@ -44,7 +44,6 @@ async function signIn() {
 }
 
 function listenResource() {
-
     console.log('start listening resource');
     firebase.firestore()
         .doc(RESOURCE_PATH)
@@ -58,16 +57,16 @@ function listenResource() {
 }
 
 function print(data) {
-    console.log("TCP ADDRESS: ", data.TCP_ADDRESS)
 
     let printers = []
     data.SELECTED_PRINTERS.forEach(function (item) {
         let printer = new ThermalPrinter({
             type: PrinterTypes.EPSON,
             interface: item.TCP_ADDRESS,
+            width: 40,
             characterSet: 'PC857_TURKISH',
         });
-        console.log('created printer ')
+        console.log('created printer ', printer);
         printer.DETAILS = item
         console.log('printer with details', printer.DETAILS)
         printers.push(printer)
@@ -98,8 +97,6 @@ function print(data) {
 
 
     } else if (data.TYPE === ORDER_TYPE) {
-
-
         if (data.ORDERS.bar) {
 
             let printer = printers.find(function (p) {

@@ -36,8 +36,12 @@ npm i pm2 -g
 pm2 start [path-to-index]
 ```
 
-start windows pm2
+Start pm2 on start-up 
+```
+pm2 startup
+```
 
+windows icin start-up
 ```
 pm2-startup install
 ```
