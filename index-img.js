@@ -4,6 +4,7 @@ require("firebase/firestore");
 require('dotenv').config()
 const ThermalPrinter = require("node-thermal-printer").printer;
 const PrinterTypes = require("node-thermal-printer").types;
+const nodeHtmlToImage = require('node-html-to-image')
 
 const firebaseConfig = {
     apiKey: process.env.FS_API_KEY,
@@ -15,15 +16,15 @@ firebase.initializeApp(firebaseConfig);
 
 const BRANCH_PATH = `customers/${process.env.CUSTOMER_ID}/branches/${process.env.BRANCH_ID}`
 const RESOURCE_PATH = `${BRANCH_PATH}/messegeQeue/msg`
-
+console.log(BRANCH_PATH)
 const ORDER_TYPE = "ORDER"
 const RECEIPT_TYPE = "RECEIPT"
 
 async function init() {
-    console.log('init thermal printer.', process.env.CUSTOMER_EMAIL, process.env.FS_API_KEY)
+    console.log('init thermal printer.')
     try {
-        await signIn().then(listenResource)
-        //listenResource()
+        await signIn()
+        listenResource()
 
     } catch (error) {
         console.error(error)
@@ -32,51 +33,48 @@ async function init() {
 
 async function signIn() {
     try {
-
         let res = await firebase.auth().signInWithEmailAndPassword(
             process.env.CUSTOMER_EMAIL,
             process.env.CUSTOMER_PASSWORD
         );
         console.log('signed in successfully.', res.email)
     } catch (error) {
-        console.error('Could not be signed in', error)
+        console.error('Could not be signed in')
         return error
     }
 }
 
 function listenResource() {
-
     console.log('start listening resource');
     firebase.firestore()
         .doc(RESOURCE_PATH)
         // .orderBy('name', 'asc')
         .onSnapshot(docSnapshot => {
-            console.log('docSnapshot', docSnapshot.data());
             let data = docSnapshot.data()
-
             print(data)
         }, err => {
             console.log(err);
         })
 }
 
-function print(data) {
+async function print(data) {
 
     let printers = []
-
     data.SELECTED_PRINTERS.forEach(function (item) {
         let printer = new ThermalPrinter({
             type: PrinterTypes.EPSON,
             interface: item.TCP_ADDRESS,
+            width: 40,
             characterSet: 'PC857_TURKISH',
         });
-        console.log('created printer ')
+        // console.log('created printer ', printer);
         printer.DETAILS = item
-        console.log('printer with details', printer.DETAILS)
+        // console.log('printer with details', printer.DETAILS)
         printers.push(printer)
     })
 
     if (data.TYPE === RECEIPT_TYPE) {
+
         console.log('printing with new printer recipet')
         let printer = printers.find(function (p) {
             return p.DETAILS.roles.RECEIPT === true
@@ -87,21 +85,29 @@ function print(data) {
             return
         }
 
-        printer.setTypeFontB();
+        await nodeHtmlToImage({
+            output: './queue-img.png',
+            html: `<!DOCTYPE html>
+            <html lang="tr">
+              <head>
+                <meta charset="UTF-8" />
+                <style>
+                  body {
+                    width: 600px;
+                    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                  }
+                </style>
+              </head>
+              <body style="width: 600px">
+                <h3 style="text-align: center; font-size: 3rem">1ARADA LOCANDA</h3>
+                <p style="font-size: 2rem">Burada birkac line bir sey yaziyor diyelim</p>
+              </body>
+            </html>
+            `
+        });
 
-        printer.setTextSize(2, 2)
-        printer.print("1Arada Locanda")
-        printer.setTextNormal();
+        await printer.printImage("./queue-img.png")
 
-        printer.tableCustom([                                       // Prints table with custom settings (text, align, width, cols, bold)
-            { text: "Left", align: "LEFT", width: 0.5 },
-            { text: "Center", align: "CENTER", width: 0.25, bold: true },
-            { text: "Right", align: "RIGHT", cols: 8 }
-        ]);
-
-        printer.println();
-
-        // printer.println(replaceTrChars(data.OUTPUT))
         printer.cut();
 
         try {
@@ -109,8 +115,11 @@ function print(data) {
             printer.beep(); // Sound internal beeper/buzzer (if available)
             console.log("Print done receipt, bar!i with new");
             // await printer.printImage(".touch.png"); // Print PNG image
+            // TODO delete file from firebase if success
+
         } catch (error) {
             console.log("Print failed with new:", error);
+            // TODO try n times more
         }
 
 
@@ -142,8 +151,9 @@ function print(data) {
 
         if (data.ORDERS.kitchen) {
             let printer = printers.find(function (p) {
+                console.log(p.DETAILS.sectionRef)
                 return p.DETAILS.roles.ORDER === true &&
-                    p.DETAILS.sectionRef === "mutfak"
+                    p.DETAILS.sectionRef === 'mutfak'
             })
 
             if (!printer) {
@@ -151,15 +161,20 @@ function print(data) {
                 return
             }
 
+
+            console.log(data.ORDERS.kitchen)
             printer.println(replaceTrChars(data.ORDERS.kitchen));
+
             printer.cut();
 
             try {
-                let execute = printer.execute();
                 printer.beep(); // Sound internal beeper/buzzer (if available)
+                let execute = printer.execute();
                 console.log("Print done kitchen with new!");
                 // await printer.printImage(".touch.png"); // Print PNG image
+                // TODO delete file from firebase if success
             } catch (error) {
+                // TODO: retry if failed for 3 times more.
                 console.log("Print failed with new:", error);
             }
         }
@@ -168,6 +183,7 @@ function print(data) {
 
     return (data)
 }
+
 
 function replaceAll(string, search, replace) {
     if (string) {
@@ -183,9 +199,6 @@ const replaceTrChars = (temp) => {
     let res = replaceAll(temp, 'İ', "i");
     // console.log(res)
     res = replaceAll(res, "ş", "s");
-    res = replaceAll(res, "ç", "c");
-    res = replaceAll(res, "Ç", "C");
-    res = replaceAll(res, "ı", "i");
     res = replaceAll(res, "Ş", "S");
     res = replaceAll(res, "ğ", "g");
     // console.log(res)
